@@ -86,13 +86,17 @@ files read or more than one package, split it.
 - Parallel tasks must have **disjoint file sets**. Two tasks that touch the
   same file run one after the other. (A parallel task once truncated a test
   file it did not own.)
-- Ending your turn ends your whole run: you are not woken up when background
-  tasks finish, and their reports go to the main session instead of you.
-  When you would only wait, start the tasks in the foreground: several Agent
-  calls in one message run in parallel and return when all are done. Use
-  background tasks only while you have your own work to do, and collect
-  every result before you finish. Never end your turn with a "waiting for
-  tasks" message.
+- Grunt tasks run in the background. Each one ends with a hand-back report
+  that is delivered to you as a message.
+- When you have nothing else to do, end your turn with one line naming the
+  tasks you wait for. You are resumed when a task reports, and again for
+  each later report.
+- Never poll a task's output file or wait in a Bash loop. A grunt task ends
+  with a hand-back, so markers such as `"stop_reason":"end_turn"` never
+  appear, and the loop blocks the report until it times out. (This cost
+  about 10 minutes per wait in two runs.)
+- Your final summary comes only after every task has reported. If a report
+  says a check failed, fix it or hand it back before you finish.
 
 ## Tests during a phase
 
