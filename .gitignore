@@ -1,0 +1,12 @@
+# Publish only the workflow files. Every project folder is ignored and is its
+# own git repo. To publish a new root file, add a "!/<name>" line below.
+/*
+!/.gitignore
+!/README.md
+!/CLAUDE.md
+!/cost-findings.md
+!/.claude/
+
+# Personal settings and generated files
+/.claude/settings.local.json
+__pycache__/
