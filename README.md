@@ -64,6 +64,7 @@ cost several dollars per lead run cost $0.41. Details in
 | `.claude/skills/implement/SKILL.md` | The `/implement <project> [task]` command. |
 | `.claude/skills/implement-long/SKILL.md`, `.claude/tools/implement-long.sh` | The `/implement-long <project> [task]` command: headless impl-lead in the background. |
 | `.claude/tools/implement-long-stats.py` | Usage of `/implement-long` runs: `finish` prints cost, tokens per model, subagents and permission denials at the end; `status` prints running and recent runs as JSON for a status line. |
+| `.claude/statusline.sh` | Optional status line: context, cache time left, tokens main vs subagents per model, this session's share of the 5h / weekly limits, `/implement-long` runs. Opt-in, see below. |
 | `.claude/tools/session-cost/` | Scripts that read your Claude Code transcripts and report cost per agent. |
 | `cost-findings.md` | What the workflow cost before and after the current rules, and the cache TTL analysis. |
 
@@ -75,6 +76,22 @@ For a live view, have your status line call
 `python3 -I .claude/tools/implement-long-stats.py status`: a JSON list of
 running runs and runs that finished in the last 2 hours, with
 `name, status, elapsed_s, tokens, ctx, cost_usd`.
+
+### Status line
+
+`.claude/statusline.sh` shows what drives the bill, fitted to the pane width
+(needs `jq` and Python 3):
+
+```
+◐ context ▰▱▱▱ 70%   ⛁ cache 52m   Σ tokens main 310k (O 310k) + subagents 1.1M (S 1.1M, H 9k) = 1.4M   5h ▰▰▱▱ 54% +9%   ⚙ impl my-app 21m · Σ 1.2M · ctx 84k · $0.84
+```
+
+It is opt-in, so it doesn't replace your own. To use it, add this to
+`.claude/settings.local.json`:
+
+```json
+{ "statusLine": { "type": "command", "command": ".claude/statusline.sh", "refreshInterval": 30 } }
+```
 
 ```bash
 python3 -I .claude/tools/session-cost/cost.py     # $ per role
