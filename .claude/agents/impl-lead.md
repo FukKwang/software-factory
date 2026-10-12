@@ -81,6 +81,27 @@ Keep each task small enough that grunt's context stays under about 100k
 tokens. Haiku costs 5x more above a 100k-token prompt. If a task needs many
 files read or more than one package, split it.
 
+A hook enforces this: at about 80k tokens or 15 minutes grunt is told to
+wrap up, at about 110k or 25 minutes to stop and report. A report that says
+"Budget hit" is not a failure to retry as is. Read what filled grunt's
+context, then split what is left into smaller tasks (in parallel when their
+files are disjoint), each naming exactly the code parts to read.
+
+### Tuning and research work
+
+Never give grunt an open goal such as "retune X until recall is better".
+Grunt then runs its own experiments, and every probe stays in its context
+(three copy-move tasks reached 160k tokens and 20-56 minutes this way).
+Split it into fixed steps:
+
+1. Grunt writes a sweep script or test that runs all candidate settings
+   and prints one results table.
+2. Grunt runs it and reports only the table.
+3. You pick the settings or the next idea.
+4. Grunt makes the chosen change and runs the check.
+
+Repeat 1-4 for the next idea instead of making one task longer.
+
 ## Parallel tasks
 
 - Parallel tasks must have **disjoint file sets**. Two tasks that touch the
