@@ -21,8 +21,8 @@ This folder holds many independent projects. Each top-level folder is one projec
 
 ## Workflow: design with Opus, implement with Sonnet and Haiku
 
-1. Main session (Opus): discuss the requirements and the design with the user. When the user approves the design, write it to `<project>/docs/design.md`.
-2. The user runs `/implement <project>`. The `impl-lead` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. impl-lead commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
+1. Main session (Opus, best as `claude --agent architect`): discuss the requirements and the design with the user. When the user approves the design, write it to `<project>/docs/design.md`, with a `Size: small | long` line.
+2. The user runs `/implement <project>` (small) or `/implement-long <project>` (long). The `impl-lead` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. impl-lead commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
 3. `impl-lead` returns a summary. Review it in the main session against the design.
 
 Subagents do not see this conversation. The design file is the only handoff, so make `docs/design.md` complete: goal, requirements, file layout, interfaces, decisions, and how to test.
@@ -32,7 +32,8 @@ Subagents do not see this conversation. The design file is the only handoff, so 
 | Task size | How to run it | Prompt cache TTL |
 |---|---|---|
 | Small: under about 30 minutes, 0-3 waits for long tests | In the Opus session: `/implement <project> <task>` (impl-lead runs as a subagent) | 5 min |
-| Big: a full phase, hours, many `check.sh` runs | New terminal in this folder: `claude --agent impl-lead`, then "Implement phase N of <project> per docs/design.md" | 1 h (main session) |
+| Big: a full phase, hours, many `check.sh` runs | In the Opus session: `/implement-long <project> <task>` (headless `claude -p --agent impl-lead --permission-mode auto` in the background, fresh context, log in `.claude/runs/`) | 1 h (main session) |
+| Big, interactive | New terminal in this folder: `claude --agent impl-lead`, then "Implement phase N of <project> per docs/design.md" | 1 h (main session) |
 
 - Waiting costs nothing; the first turn after a wait of more than 5 minutes rewrites the context to cache (about context size x $2.50/MTok on Sonnet 5.5). At 30k context that is about $0.08 per wait; at 150k about $0.38. A 1h TTL pays off only above about 3 such waits per run, so small tasks keep the 5 min default.
 - In a big-phase session the context limit still applies: at about 150k, impl-lead updates `docs/handoff.md` and commits; then run `/clear` and tell it to continue from the handoff.
