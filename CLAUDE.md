@@ -25,6 +25,8 @@ This folder holds many independent projects. Each top-level folder is one projec
 2. The user runs `/implement <project>` (small) or `/implement-long <project>` (long). The `implementer` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. implementer commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
 3. `implementer` returns a summary. Review it in the main session against the design.
 
+For a straightforward task with no design, use `claude --agent manager` (or `/manager <task>`). The `manager` agent (Sonnet) always delegates: it splits the task into small pieces with disjoint files and runs them in waves of up to 5 parallel `grunt` agents. It may start only `grunt` (tool allowlist `Agent(grunt)` plus the `manager-grunt-only.py` hook).
+
 Subagents do not see this conversation. The design file is the only handoff, so make `docs/design.md` complete: goal, requirements, file layout, interfaces, decisions, and how to test.
 
 ## Small task or big phase

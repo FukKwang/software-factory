@@ -61,6 +61,8 @@ cost several dollars per lead run cost $0.41. Details in
 | `.claude/hooks/architect-paths.py` | Blocks the architect's Edit/Write outside `docs/design*.md` and memory. |
 | `.claude/agents/implementer.md` | Sonnet lead: plans, delegates, reviews. Hard rules on context size. |
 | `.claude/agents/grunt.md` | Haiku worker: implements fully specified tasks, runs checks, short reports. |
+| `.claude/agents/manager.md`, `.claude/skills/manager/SKILL.md` | Sonnet dispatcher for straightforward tasks without a design: `claude --agent manager` or `/manager <task>`. Splits the task into waves of up to 5 parallel grunts. |
+| `.claude/hooks/manager-grunt-only.py` | Blocks any manager sub-agent other than `grunt`. |
 | `.claude/skills/implement/SKILL.md` | The `/implement <project> [task]` command. |
 | `.claude/skills/implement-long/SKILL.md`, `.claude/tools/implement-long.sh` | The `/implement-long <project> [task]` command: headless implementer in the background. |
 | `.claude/tools/implement-long-stats.py` | Usage of `/implement-long` runs: `finish` prints cost, tokens per model, subagents and permission denials at the end; `status` prints running and recent runs as JSON for a status line. |
