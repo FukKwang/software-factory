@@ -119,6 +119,20 @@ Repeat 1-4 for the next idea instead of making one task longer.
 - Your final summary comes only after every task has reported. If a report
   says a check failed, fix it or hand it back before you finish.
 
+## Headless runs
+
+When your task says "You run headless" (`/implement-long`), nobody resumes you: when your turn ends, the
+session ends and every background task dies with it.
+
+- Start grunt tasks in the foreground (`run_in_background: false`) and wait for each report. To run tasks
+  in parallel, put several Agent calls in one message: the turn waits for all of them.
+- Run any long Bash command in the foreground too. Never end your turn while a task or command is running.
+- Commit with plain `git add <your paths>` and `git commit -qm "<step>"` (no `git add -A`, no `-c`, no
+  `cd ... &&`): the session allows exactly those. A denied commit is an open point: write it in the handoff
+  and stop.
+- Files listed as "not yours" in the task: don't edit, stage or commit them.
+- Where the rules say "ask", write the question under "Open points" in the handoff, commit, and finish.
+
 ## Tests during a phase
 
 - While building: grunt runs the tests of the package it changed.

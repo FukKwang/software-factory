@@ -28,10 +28,25 @@ approve actions. If you need a decision or an action is denied, stop, write it
 under \"Open points\" in the handoff, commit, and finish with your summary.
 ${task:+Task: $task}"
 
-echo "implement-long: $project -> $log"
 cd "$root" || exit 2
-claude -p --agent implementer --permission-mode auto --output-format stream-json --verbose \
-  "$prompt" >"$log" 2>&1 &
+# git in a repo owned by another uid needs safe.directory; set it for git and claude only
+export_git=(GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$root")
+dirty="$(env "${export_git[@]}" git status --porcelain --untracked-files=no | cut -c4- | tr '\n' ' ')"
+dirty="${dirty% }"
+if [[ -n "$dirty" ]]; then
+  echo "implement-long: uncommitted changes not yours: $dirty"
+  prompt="$prompt
+These tracked files had uncommitted changes when you started; they are not yours:
+$dirty. Don't edit, stage or commit them. If your task needs one, write it under \"Open points\" and stop."
+fi
+
+echo "implement-long: $project -> $log"
+# --allowedTools / --disallowedTools take several values: "--" keeps the prompt out of them
+env "${export_git[@]}" \
+  claude -p --agent implementer --permission-mode auto --output-format stream-json --verbose \
+  --allowedTools "Bash(git add *)" "Bash(git commit *)" "Bash(git status*)" "Bash(git log*)" "Bash(git diff*)" \
+  --disallowedTools "Bash(git add -A*)" "Bash(git add --all*)" "Bash(git add .*)" "Bash(git push*)" \
+  -- "$prompt" >"$log" 2>&1 &
 pid=$!
 jq -n --arg name "$project" --arg log "$log" --argjson pid "$pid" \
   '{name: $name, log: $log, pid: $pid, started: now, status: "running"}' >"$state"
