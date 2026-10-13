@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run impl-lead as a headless Claude session (fresh context, 1h cache) for a long task.
+# Run implementer as a headless Claude session (fresh context, 1h cache) for a long task.
 # Usage (from the factory root): .claude/tools/implement-long.sh <project> [task...]
 # Logs to .claude/runs/<project>-<time>.log.
 set -uo pipefail
@@ -30,7 +30,7 @@ ${task:+Task: $task}"
 
 echo "implement-long: $project -> $log"
 cd "$root" || exit 2
-claude -p --agent impl-lead --permission-mode auto --output-format stream-json --verbose \
+claude -p --agent implementer --permission-mode auto --output-format stream-json --verbose \
   "$prompt" >"$log" 2>&1 &
 pid=$!
 jq -n --arg name "$project" --arg log "$log" --argjson pid "$pid" \

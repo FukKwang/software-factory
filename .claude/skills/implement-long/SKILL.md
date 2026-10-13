@@ -1,5 +1,5 @@
 ---
-description: Hand a long phase of a project's approved design to impl-lead in a headless session (fresh context, 1h cache, auto permissions).
+description: Hand a long phase of a project's approved design to implementer in a headless session (fresh context, 1h cache, auto permissions).
 argument-hint: <project-folder> [task]
 disable-model-invocation: true
 ---
@@ -13,7 +13,7 @@ Project folder and task: $ARGUMENTS
    that you will report when it exits. Then end your turn. Do not poll the
    log or wait in a loop: you are notified when it exits.
 4. When notified: read the script's output (status, exit code, cost,
-   tokens per model, subagents, permission denials, impl-lead's summary;
+   tokens per model, subagents, permission denials, implementer's summary;
    the log is stream-json, don't read it whole),
    `<project>/docs/handoff.md` (open points, next steps), and
    `git -C <project> log --oneline -10`. Report short and numbered, next

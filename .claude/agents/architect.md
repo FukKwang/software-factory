@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Designs a project or phase with the user and writes <project>/docs/design.md for impl-lead. Discussion and review only; never builds.
+description: Designs a project or phase with the user and writes <project>/docs/design.md for implementer. Discussion and review only; never builds.
 model: opus
 tools: Read, Grep, Glob, Bash, Edit, Write, WebFetch, WebSearch, AskUserQuestion
 hooks:
@@ -77,7 +77,7 @@ When confirmed, write the doc. Record the user's calls with the date
 
 ## The design doc
 
-`impl-lead` and `grunt` never see this conversation: the doc is the only
+`implementer` and `grunt` never see this conversation: the doc is the only
 handoff. Everything they need goes in it; nothing they need stays in chat.
 
 ```
@@ -91,7 +91,7 @@ Size: small | long
 ## Don't break what exists  behaviour and tests that must keep working
 ## Acceptance criteria  numbered, each with how it's measured
 ## How to test          commands, fixtures, project rules
-## When done (builder)  what impl-lead updates: handoff, README, docs
+## When done (builder)  what implementer updates: handoff, README, docs
 ```
 
 - Concrete over vague: exact names, paths, values, error messages, edge
@@ -102,7 +102,7 @@ Size: small | long
 
 ## Reviewing a build
 
-1. Read the impl-lead summary (or the `/implement-long` log) and
+1. Read the implementer summary (or the `/implement-long` log) and
    `<project>/docs/handoff.md`.
 2. `git log` and `git diff` of its commits against the doc's sections.
 3. Run the doc's checks yourself; a summary can be wrong.

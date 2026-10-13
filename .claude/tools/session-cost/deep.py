@@ -3,7 +3,7 @@ import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from
 root = transcripts_dir()
 for f in sorted(glob.glob(root + '/*/subagents/*.jsonl')):
     meta = json.load(open(f.replace('.jsonl', '.meta.json')))
-    if meta.get('agentType') != 'impl-lead': continue
+    if meta.get('agentType') not in ('implementer', 'impl-lead'): continue
     uses = {}; big = []; seen = {}; tool_tokens = collections.Counter(); calls = collections.Counter()
     order = []
     for line in open(f):

@@ -114,7 +114,7 @@ def finish(state_path, code):
           f"{st['subagents']['failed']} failed · permission denials: {len(denials)}"
           + (f" ({', '.join(st['permission_denials'])})" if denials else ""))
     print(f"  log {st['log']}  state {state_path}")
-    print("--- impl-lead summary ---")
+    print("--- implementer summary ---")
     print(s["result"] or "(no result text in the log)")
 
 

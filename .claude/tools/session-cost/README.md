@@ -7,10 +7,10 @@ token use and estimated cost per agent. Run each with `python3 -I <script>`.
 
 | Script | Output |
 |---|---|
-| `cost.py` | Estimated $ per role (main, impl-lead, grunt), split into cache read, cache write, output; count of test/check commands per role. |
+| `cost.py` | Estimated $ per role (main, implementer, grunt), split into cache read, cache write, output; count of test/check commands per role. |
 | `detail.py` | One line per transcript: model, turns, context avg/max, grunt calls. |
-| `deep.py` | impl-lead runs: tokens added per tool, biggest tool results, full cache rebuilds. |
-| `deep2.py` | impl-lead and main: thinking vs tool input size, heredoc edits, cache TTL of writes. |
+| `deep.py` | implementer runs: tokens added per tool, biggest tool results, full cache rebuilds. |
+| `deep2.py` | implementer and main: thinking vs tool input size, heredoc edits, cache TTL of writes. |
 | `miss.py` | The events just before each full cache rebuild. |
 | `ttl.py` | Simulated cache cost of subagents with a 1h TTL instead of 5m. |
 | `grunt.py` | Each grunt task: size, turns, max context, start of task and report. |

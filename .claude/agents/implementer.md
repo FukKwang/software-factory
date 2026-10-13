@@ -1,5 +1,5 @@
 ---
-name: impl-lead
+name: implementer
 description: Implements an approved design from <project>/docs/design.md. Use after design is approved.
 model: sonnet
 tools: Read, Edit, Write, Bash, Grep, Glob, Agent

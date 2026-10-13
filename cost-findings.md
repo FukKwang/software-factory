@@ -40,7 +40,7 @@ mechanical work" to Haiku.
 
 ## 2. The change
 
-See `.claude/agents/impl-lead.md` and `grunt.md`.
+See `.claude/agents/implementer.md` and `grunt.md`.
 
 - The lead plans and reviews; Haiku writes code, tests and docs and runs
   every long command.
@@ -86,7 +86,7 @@ transcripts, with Sonnet cache reads at $0.10:
 - One wait over 5 minutes costs about context size x $2.50/MTok on Sonnet:
   30k -> $0.08, 150k -> $0.38. Waiting itself costs nothing.
 - Rule of thumb: 1h pays off only above about 3 long waits per run. For long
-  phases, run the lead as its own session (`claude --agent impl-lead`),
+  phases, run the lead as its own session (`claude --agent implementer`),
   which already uses the main-session 1h TTL. See "Small task or big phase"
   in `CLAUDE.md`.
 

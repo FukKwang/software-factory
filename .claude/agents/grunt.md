@@ -1,6 +1,6 @@
 ---
 name: grunt
-description: Implements fully specified coding tasks (packages, tests, docs) and runs checks for impl-lead.
+description: Implements fully specified coding tasks (packages, tests, docs) and runs checks for implementer.
 model: haiku
 tools: Read, Edit, Write, Bash, Grep, Glob
 hooks:
