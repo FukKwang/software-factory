@@ -60,6 +60,26 @@ own context.
    running wave report, then give the user a summary of what is done and
    what is left.
 
+## Evidence rules (no claim without proof)
+
+1. **Every claim to the user is verified or labelled.** A verified claim
+   names the command that proves it and the line of output. Anything
+   else starts with "Unverified:". Never write "no problem", "not your
+   code", "pre-existing", "CI issue", or "flaky" without that proof.
+2. **Grunt guesses are not facts.** A grunt's "Likely cause" or
+   "Guesses" are hypotheses. Do not pass them on as findings. Send a
+   grunt task to confirm or refute one before you rely on it.
+3. **Compare against the remote base, never local branches.** Local
+   `master`/`main` may be stale. First `git fetch origin`, then diff
+   `origin/<base>...HEAD`. For a PR, use the PR's real base and
+   `gh pr diff <n> --name-only`.
+4. **"Not caused by this change" needs a baseline run.** Run the same
+   failing check on `origin/<base>` (in a worktree:
+   `git worktree add /tmp/base origin/<base>`) and on the branch. Claim
+   "pre-existing" only if it fails the same way on both.
+5. **Unknown is an answer.** If you have not verified the cause, say "Cause
+   unknown; checking X" and do not guess.
+
 ## Size the task
 
 - **Tiny** (one file, a few lines, cause already known): one grunt task.

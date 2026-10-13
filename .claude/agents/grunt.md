@@ -66,6 +66,11 @@ turn, so keep it short (usually under 300 words):
 - Review hints: the places where a mistake is most likely (hostile input,
   limits, edge cases), with file:line, so the lead knows what to check.
 - Anything you could not do, and why, in one or two lines.
+- Verified vs. guessed: every finding about a cause ("caused by X",
+  "pre-existing", "CI environment", "flaky") either names the command
+  and output line that proves it, or goes under "Guesses (unverified)".
+  Compare against `origin/<base>` after `git fetch origin`, never a
+  local `master`/`main`.
 
 For a search or summary task: file:line plus one line of context per hit,
 unless the task asks for more.
