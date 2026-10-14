@@ -201,6 +201,22 @@ Rules for splitting:
 - **Separate scratch paths.** Parallel tasks that write temp files, logs or
   sweep tests use different names (`/tmp/<task>-*.log`, `zz_<task>_test.go`).
 
+## Scratch files stay out of the project
+
+Sweep, diagnostic and probe code (`zz_*_test.go`, tests gated by an env
+var such as `CM_SWEEP=1`, helper scripts, `/tmp` logs) is scratch. One run
+committed its sweep and diagnostic tests into the project; they then had to
+be formatted, kept compiling, and reviewed.
+
+- Never commit scratch files. `git add` lists only the phase's real files.
+- Put what a scratch run found (the table, the chosen value and why) in the
+  handoff's phase section, so the result survives without the code.
+- Before the final summary, a grunt task deletes the phase's scratch files
+  and runs the changed packages' tests. If a sweep or diagnostic is worth
+  keeping as a project tool, leave it uncommitted and ask under
+  `## Open questions` `[for architect]`: keep it (where, how it is run) or
+  delete it.
+
 ## Waiting for grunt tasks
 
 - Grunt tasks run in the background. Each one ends with a hand-back report
@@ -223,6 +239,9 @@ session ends and every background task dies with it.
 - Start grunt tasks in the foreground (`run_in_background: false`) and wait for each report. To run tasks
   in parallel, put several Agent calls in one message: the turn waits for all of them.
 - Run any long Bash command in the foreground too. Never end your turn while a task or command is running.
+- Never `cd`, not even `cd <project> && ...`: the Bash tool keeps the working directory, so one `cd` breaks
+  every later relative path and `git -C <project>` call, and the git calls that then miss the allow rules
+  are denied by the auto mode classifier.
 - Commit with `git -C <project> add <your paths>` and `git -C <project> commit -qm "<step>"` (the project
   is its own repo; no `git add -A`, no `-c`, no `cd ... &&`): the session allows exactly those. A denied
   commit is an open point: write it in the handoff and stop.

@@ -54,15 +54,24 @@ $dirty. Don't edit, stage or commit them. If your task needs one, write it under
 fi
 prompt="$prompt
 $project is its own git repo and you run from the factory root: run git only as
-\`git -C $project <command>\` (add, commit, status, log, diff), with paths relative to $project."
+\`git -C $project <command>\` (add, commit, status, log, diff), with paths relative to $project.
+Never cd (not even \`cd $project && ...\`): the Bash tool keeps the working directory, so one cd
+breaks every later relative path and \`git -C $project\` call. Use paths relative to the factory root."
 
 echo "implement-detach: $project -> $log"
 g="git -C $project"
+a="git -C $root/$project"  # the same repo by absolute path
+# allow both -C forms and read-only git without -C: an earlier run that had cd'd into the project
+# called plain and absolute-path git, missed the allow rules, and the auto mode classifier denied
+# even `git status` ("Git Destructive")
 # --allowedTools / --disallowedTools take several values: "--" keeps the prompt out of them
 env "${export_git[@]}" \
   claude -p --agent implementer --permission-mode auto --output-format stream-json --verbose \
   --allowedTools "Bash($g add *)" "Bash($g commit *)" "Bash($g status*)" "Bash($g log*)" "Bash($g diff*)" \
+    "Bash($a add *)" "Bash($a commit *)" "Bash($a status*)" "Bash($a log*)" "Bash($a diff*)" \
+    "Bash(git status*)" "Bash(git log*)" "Bash(git diff*)" \
   --disallowedTools "Bash($g add -A*)" "Bash($g add --all*)" "Bash($g add .*)" "Bash(git add -A*)" \
+    "Bash($a add -A*)" "Bash($a add --all*)" "Bash($a add .*)" \
     "Bash(git add --all*)" "Bash(git push*)" "Bash(git -C * push*)" \
   -- "$prompt" </dev/null >"$log" 2>&1 &
 pid=$!

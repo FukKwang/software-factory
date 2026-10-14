@@ -51,8 +51,10 @@ def scan(log):
                 if not u or msg.get("model") == "<synthetic>" or mid in seen:
                     continue
                 seen.add(mid)
-                n = (u.get("input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0) \
-                    + (u.get("output_tokens") or 0)
+                # no output_tokens: stream-json writes a message's usage before the message is
+                # generated, so its output count is far too low; finish() takes exact totals
+                # (output included) from the result event's modelUsage
+                n = (u.get("input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0)
                 fam = family(msg.get("model"))
                 out["tokens"][fam] = out["tokens"].get(fam, 0) + n
                 if e.get("parent_tool_use_id") is None:  # main thread: its context size
@@ -85,6 +87,11 @@ def finish(state_path, code):
                      "cache_read": u.get("cacheReadInputTokens", 0),
                      "cache_write": u.get("cacheCreationInputTokens", 0),
                      "cost_usd": round(u.get("costUSD", 0), 4)}
+    if models:  # exact per-model totals (input + cache writes + output) replace the live estimate
+        s["tokens"] = {}
+        for m, u in models.items():
+            f = family(m)
+            s["tokens"][f] = s["tokens"].get(f, 0) + u["input"] + u["cache_write"] + u["output"]
     sub = last.get("subagent_stats") or {}
     denials = last.get("permission_denials") or []
     st.update({

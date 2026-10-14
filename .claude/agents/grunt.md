@@ -44,7 +44,9 @@ follow their interfaces and rules exactly.
   `uptime` (load average) next to the figures: a loaded machine makes
   them fail.
 - Scratch files use the task's name (`/tmp/<task>-*.log`,
-  `zz_<task>_test.go`): parallel grunts write their own.
+  `zz_<task>_test.go`): parallel grunts write their own. List every scratch
+  file you created in your report under "Scratch": the lead keeps them out
+  of commits and deletes them at the end of the phase.
 - Read big files in parts (offset and limit, or `grep -n`), not whole.
   For a file over 300 lines, find what you need with `grep -n` first and
   read only those parts.
