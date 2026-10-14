@@ -31,6 +31,12 @@ ${task:+Task: $task}"
 cd "$root" || exit 2
 # git in a repo owned by another uid needs safe.directory; set it for git and claude only
 export_git=(GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$root")
+# new work never goes on the default branch; headless can't switch branches itself
+branch="$(env "${export_git[@]}" git branch --show-current)"
+if [[ "$branch" == "master" || "$branch" == "main" || -z "$branch" ]]; then
+  echo "implement-long: on '${branch:-detached HEAD}'; switch to the work branch (Branch: on the board) first"
+  exit 2
+fi
 dirty="$(env "${export_git[@]}" git status --porcelain --untracked-files=no | cut -c4- | tr '\n' ' ')"
 dirty="${dirty% }"
 if [[ -n "$dirty" ]]; then

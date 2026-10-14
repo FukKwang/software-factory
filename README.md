@@ -27,17 +27,20 @@ cost several dollars per lead run cost $0.41. Details in
 1. Create a project: `mkdir my-app && cd my-app && git init && cd ..`.
    Optional: write the project rules in `my-app/CLAUDE.md`.
 2. Run `claude --agent architect` in this root folder (Opus). The architect
-   grills you on the design in rounds of numbered questions, each with its
+   grills you on the design one question at a time, each with its
    recommended answer, until every decision is settled. It only writes
-   `my-app/docs/design.md`; a hook blocks it from editing code. (Plain
+   `my-app/docs/design.md` and the board in `my-app/docs/handoff.md`; a hook
+   blocks it from editing code. (Plain
    `claude` also uses Opus, `.claude/settings.json`, without these rules.)
 3. Confirm the design. The architect writes `my-app/docs/design.md` with a
-   `Size: small | long` line. Subagents do not see the conversation, so the
-   design file must be complete.
+   `Size: small | long` line, sets up the board (`## Now`, `## Open
+   questions`, `## Log` at the top of `my-app/docs/handoff.md`), creates the
+   work branch, and commits both files. Subagents do not see the
+   conversation, so the design file must be complete.
 4. Implement:
    - **Small task** (`Size: small`, under about 30 minutes):
-     `/implement my-app <task>`. `implementer` runs as a subagent and returns
-     a summary.
+     `/implement my-app <task>`. `implementer` runs as a background subagent
+     and reports when done.
    - **Long phase** (`Size: long`, hours, many test runs):
      `/implement-long my-app <task>`. `implementer` runs as a headless
      `claude -p --permission-mode auto` session in the background, with a
@@ -45,9 +48,10 @@ cost several dollars per lead run cost $0.41. Details in
      stays free and is notified when it exits; the log is in
      `.claude/runs/`. It can't ask you anything, so open points go to
      `my-app/docs/handoff.md`.
-   - Or talk to Sonnet directly: `claude --agent implementer` in a new
-     terminal, then "Implement phase N of my-app per docs/design.md".
-5. Review in the Opus session: read the summary, `my-app/docs/handoff.md`,
+   - Or keep two sessions: `claude --agent implementer` in a new terminal,
+     then send `next my-app`. It reads the board, builds the phase on it,
+     and hands back through the board.
+5. Review in the Opus session: read the board in `my-app/docs/handoff.md`,
    `git log` and `git diff`. Run the project's checks yourself; summaries
    can be wrong.
 
@@ -58,7 +62,7 @@ cost several dollars per lead run cost $0.41. Details in
 | `CLAUDE.md` | Rules and workflow for Claude in this folder. |
 | `.claude/settings.json` | Opus as the main model. Put personal settings in `.claude/settings.local.json` (not committed). |
 | `.claude/agents/architect.md` | Opus architect: grills you on the design, writes `docs/design.md`, reviews builds. Never builds. |
-| `.claude/hooks/architect-paths.py` | Blocks the architect's Edit/Write outside `docs/design*.md` and memory. |
+| `.claude/hooks/architect-paths.py` | Blocks the architect's Edit/Write outside `docs/design*.md`, `docs/handoff.md` and memory; lets `implementer`/`grunt` forked from its session through. |
 | `.claude/agents/implementer.md` | Sonnet lead: plans, delegates, reviews. Hard rules on context size. |
 | `.claude/agents/grunt.md` | Haiku worker: implements fully specified tasks, runs checks, short reports. |
 | `.claude/agents/manager.md`, `.claude/skills/manager/SKILL.md` | Sonnet dispatcher for straightforward tasks without a design: `claude --agent manager` or `/manager <task>`. Splits the task into waves of up to 5 parallel grunts. |

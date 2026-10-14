@@ -3,7 +3,7 @@ description: Hand the approved design of a project to the Sonnet implementation 
 argument-hint: <project-folder> [extra instructions]
 context: fork
 agent: implementer
-background: false
+background: true
 disable-model-invocation: true
 ---
 Project folder and instructions: $ARGUMENTS
