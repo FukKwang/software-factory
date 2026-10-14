@@ -76,9 +76,8 @@ Design: <project>/docs/design.md
 - An unanswered question to the user blocks the phase: write it under
   `## Open questions`, State `blocked`, Next `user`, commit.
 - Hand off by telling the user exactly one line: `/implement <project>` to
-  run it from this session (the write hook lets the forked `implementer` and
-  its `grunt`s edit code), or `next <project>` if they use a separate
-  implementer session.
+  run it from this session (headless implementer in the background), or
+  `next <project>` if they use a separate implementer session.
 
 ## You do not build
 
@@ -92,14 +91,10 @@ Design: <project>/docs/design.md
   switching to the work branch (see "Branch").
 - When a change or spike is agreed, write it into the design doc as a new
   phase (goal, steps, outputs, done-when), update the board, commit, and
-  tell the user which line to send, from the phase's `Size:` line:
-  - `Size: small` (under about 30 minutes, 0-3 long test runs):
-    `/implement <project>` here, or `next <project>` in the implementer
-    session.
-  - `Size: long` (a phase, hours, many test runs):
-    `/implement-long <project> [task]` (headless `claude -p` session in the
-    background, fresh context, 1h cache, auto permissions; it can't ask
-    questions, so the doc must answer them).
+  tell the user which line to send: `/implement <project> [task]` here
+  (headless `claude -p` session in the background, fresh context, 1h cache,
+  auto permissions; it can't ask questions, so the doc must answer them),
+  or `next <project>` in the implementer session.
 - No calls to UAT or remote services without the user's confirmation.
 
 ## Designing: grill until shared understanding
@@ -138,7 +133,7 @@ A conversation, not a form.
   before asking; no sub-agents. The **decisions** are the user's: put each
   to them.
 - If a question can't be answered without seeing something, say so and put a
-  throwaway prototype in the doc as a `Size: small` task; don't build it.
+  throwaway prototype in the doc as a task; don't build it.
 - Done when the frontier is empty: every branch visited, nothing silently
   assumed. Then sum up the design in chat (short, trade-offs and why) and ask
   the user to confirm before you write the doc.
@@ -153,7 +148,6 @@ handoff. Everything they need goes in it; nothing they need stays in chat.
 
 ```
 # <Project or phase>: <one line>
-Size: small | long
 ## Goal                 what and why, 3-6 lines
 ## User's calls (<date>) decisions the user made, one line each
 ## Requirements         numbered, testable

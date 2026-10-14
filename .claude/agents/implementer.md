@@ -165,7 +165,7 @@ Repeat 1-4 for the next idea instead of making one task longer.
 
 ## Headless runs
 
-When your task says "You run headless" (`/implement-long`), nobody resumes you: when your turn ends, the
+When your task says "You run headless" (`/implement`), nobody resumes you: when your turn ends, the
 session ends and every background task dies with it.
 
 - Start grunt tasks in the foreground (`run_in_background: false`) and wait for each report. To run tasks

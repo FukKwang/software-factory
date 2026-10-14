@@ -3,8 +3,8 @@
 
 Allowed: <project>/docs/design*.md (design.md, design-phase2.md, docs/design/*.md),
 <project>/docs/handoff.md (the board) and ~/.claude/projects/*/memory/*.md.
-Builders forked from the architect session (/implement -> implementer, which
-spawns grunt) are let through: the hook input carries their agent_id/agent_type.
+Subagents named implementer or grunt are let through (the hook input carries
+their agent_id/agent_type). /implement runs implementer headless, outside this hook.
 Anything else is blocked (exit 2); the reason goes back to the agent.
 """
 import json

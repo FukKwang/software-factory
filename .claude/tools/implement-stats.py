@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Usage stats for /implement-long runs (headless `claude -p --output-format stream-json`).
+"""Usage stats for /implement runs (headless `claude -p --output-format stream-json`).
 
-  implement-long-stats.py finish <state.json> <exit>   write the summary into the state
+  implement-stats.py finish <state.json> <exit>   write the summary into the state
                                                         file, print it for the caller
-  implement-long-stats.py status                       JSON list of recent runs (status line)
+  implement-stats.py status                       JSON list of recent runs (status line)
 
-State files: .claude/runs/<run>.json, written by implement-long.sh:
+State files: .claude/runs/<run>.json, written by implement.sh:
   {"name", "log", "pid", "started", "status": "running" | "done" | "failed" | "died", ...}
 """
 import glob
@@ -105,7 +105,7 @@ def finish(state_path, code):
 
     total = sum(s["tokens"].values())
     per = ", ".join(f"{f} {k(n)}" for f, n in sorted(s["tokens"].items(), key=lambda x: -x[1]))
-    print(f"implement-long: {st['name']} {st['status']} (exit {code}) in {dur(st['wall_s'])}")
+    print(f"implement: {st['name']} {st['status']} (exit {code}) in {dur(st['wall_s'])}")
     print(f"  cost ${st['cost_usd']:.2f} · tokens {k(total)} ({per}) · session {s['session_id']}")
     for m, u in models.items():
         print(f"  {m}: in {k(u['input'])}, cache write {k(u['cache_write'])}, "
