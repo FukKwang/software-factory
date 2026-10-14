@@ -65,7 +65,7 @@ cost several dollars per lead run cost $0.41. Details in
 | `.claude/agents/manager.md`, `.claude/skills/manager/SKILL.md` | Sonnet dispatcher for straightforward tasks without a design: `claude --agent manager` or `/manager <task>`. Splits the task into waves of up to 5 parallel grunts. |
 | `.claude/hooks/manager-grunt-only.py` | Blocks any manager sub-agent other than `grunt`. |
 | `.claude/skills/implement/SKILL.md`, `.claude/tools/implement.sh` | The `/implement <project> [task]` command: headless implementer in the background. |
-| `.claude/tools/implement-watch.py` | Shows an `/implement` run as a readable chat: implementer's text, tool calls and results, grunt runs indented. Follows the log live; `--once` prints a snapshot, `--full` keeps long text. |
+| `.claude/tools/implement-watch.py` | Shows an `/implement` run as a readable chat: implementer's text, tool calls and results, grunt runs indented, context size on each line, and tokens per agent (turns, peak context, new input, cache reads, output, model) when each grunt ends and at the end. Follows the log live; `--once` prints a snapshot, `--full` keeps long text. |
 | `.claude/tools/implement-stats.py` | Usage of `/implement` runs: `finish` prints cost, tokens per model, subagents and permission denials at the end; `status` prints running and recent runs as JSON for a status line. |
 | `.claude/tools/session-cost/` | Scripts that read your Claude Code transcripts and report cost per agent. |
 | `cost-findings.md` | What the workflow cost before and after the current rules, and the cache TTL analysis. |
