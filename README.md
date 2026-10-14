@@ -38,13 +38,15 @@ cost several dollars per lead run cost $0.41. Details in
    work branch, and commits both files. Subagents do not see the
    conversation, so the design file must be complete.
 4. Implement:
-   - `/implement my-app <task>`. `implementer` runs as a headless
-     `claude -p --permission-mode auto` session in the background, with a
-     fresh context and the main-session prompt cache (1 hour). Your session
-     stays free and is notified when it exits; the log is in
-     `.claude/runs/`. It can't ask you anything, so open points go to
-     `my-app/docs/handoff.md`. (Not a subagent: a subagent cannot start
-     subagents, so it could not delegate to `grunt`.)
+   - `/implement my-app <task>`. `implementer` runs as a background
+     subagent of your session and starts `grunt` subagents; the subagent
+     panel shows the tree. It reports when done.
+   - `/implement-detach my-app <task>`, for a long phase. `implementer` runs
+     as a headless `claude -p --permission-mode auto` session in the
+     background, with a fresh context and the main-session prompt cache
+     (1 hour). Your session stays free and is notified when it exits; the
+     log is in `.claude/runs/`. It can't ask you anything, so open points go
+     to `my-app/docs/handoff.md`.
    - Or keep two sessions: `claude --agent implementer` in a new terminal,
      then send `next my-app`. It reads the board, builds the phase on it,
      and hands back through the board.
@@ -64,15 +66,17 @@ cost several dollars per lead run cost $0.41. Details in
 | `.claude/agents/grunt.md` | Haiku worker: implements fully specified tasks, runs checks, short reports. |
 | `.claude/agents/manager.md`, `.claude/skills/manager/SKILL.md` | Sonnet dispatcher for straightforward tasks without a design: `claude --agent manager` or `/manager <task>`. Splits the task into waves of up to 5 parallel grunts. |
 | `.claude/hooks/manager-grunt-only.py` | Blocks any manager sub-agent other than `grunt`. |
-| `.claude/skills/implement/SKILL.md`, `.claude/tools/implement.sh` | The `/implement <project> [task]` command: headless implementer in the background. |
-| `.claude/tools/implement-watch.py` | Shows an `/implement` run as a readable chat: implementer's text, tool calls and results, grunt runs indented, context size on each line, and tokens per agent (turns, peak context, new input, cache reads, output, model) when each grunt ends and at the end. Follows the log live; `--once` prints a snapshot, `--full` keeps long text. |
-| `.claude/tools/implement-stats.py` | Usage of `/implement` runs: `finish` prints cost, tokens per model, subagents and permission denials at the end; `status` prints running and recent runs as JSON for a status line. |
+| `.claude/skills/implement/SKILL.md` | The `/implement <project> [task]` command: implementer as a background subagent. |
+| `.claude/hooks/architect-no-agents.py` | Blocks the architect's own Agent calls. architect lists `Agent(implementer, grunt)` only so `/implement` can start grunt. |
+| `.claude/skills/implement-detach/SKILL.md`, `.claude/tools/implement-detach.sh` | The `/implement-detach <project> [task]` command: headless implementer in the background. |
+| `.claude/tools/implement-watch.py` | Shows an `/implement-detach` run as a readable chat: implementer's text, tool calls and results, grunt runs indented, context size on each line, and tokens per agent (turns, peak context, new input, cache reads, output, model) when each grunt ends and at the end. Follows the log live; `--once` prints a snapshot, `--full` keeps long text. |
+| `.claude/tools/implement-stats.py` | Usage of `/implement-detach` runs: `finish` prints cost, tokens per model, subagents and permission denials at the end; `status` prints running and recent runs as JSON for a status line. |
 | `.claude/tools/session-cost/` | Scripts that read your Claude Code transcripts and report cost per agent. |
 | `cost-findings.md` | What the workflow cost before and after the current rules, and the cache TTL analysis. |
 
 ## Measure your own runs
 
-To watch a run live, in another terminal:
+To watch an `/implement-detach` run live, in another terminal:
 
 ```bash
 python3 -I .claude/tools/implement-watch.py my-app          # follow until the run ends
@@ -82,7 +86,7 @@ python3 -I .claude/tools/implement-watch.py my-app --once   # snapshot
 After the run, `claude --resume` opens the headless session in the normal
 chat view.
 
-`/implement` prints each run's cost, tokens per model, subagent count and
+`/implement-detach` prints each run's cost, tokens per model, subagent count and
 permission denials when it exits, and keeps them in `.claude/runs/<run>.json`.
 For a live view, have your status line call
 `python3 -I .claude/tools/implement-stats.py status`: a JSON list of

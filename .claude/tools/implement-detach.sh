@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Run implementer as a headless Claude session (fresh context, 1h cache).
-# Usage (from the factory root): .claude/tools/implement.sh <project> [task...]
+# /implement-detach: run implementer as a headless Claude session (fresh context, 1h cache).
+# Usage (from the factory root): .claude/tools/implement-detach.sh <project> [task...]
 # Logs to .claude/runs/<project>-<time>.log.
 set -uo pipefail
 
@@ -11,7 +11,7 @@ task="$*"
 
 design="$root/$project/docs/design.md"
 if [[ -z "$project" || ! -f "$design" ]]; then
-  echo "implement: no design file: ${design}" >&2
+  echo "implement-detach: no design file: ${design}" >&2
   exit 2
 fi
 
@@ -35,19 +35,19 @@ repo="$root/$project"
 export_git=(GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0="$repo")
 top="$(env "${export_git[@]}" git -C "$repo" rev-parse --show-toplevel 2>/dev/null)"
 if [[ "$top" != "$(realpath "$repo")" ]]; then
-  echo "implement: $project is not its own git repo (git init it first)"
+  echo "implement-detach: $project is not its own git repo (git init it first)"
   exit 2
 fi
 # new work never goes on the default branch; headless can't switch branches itself
 branch="$(env "${export_git[@]}" git -C "$repo" branch --show-current)"
 if [[ "$branch" == "master" || "$branch" == "main" || -z "$branch" ]]; then
-  echo "implement: $project on '${branch:-detached HEAD}'; switch to the work branch (Branch: on the board) first"
+  echo "implement-detach: $project on '${branch:-detached HEAD}'; switch to the work branch (Branch: on the board) first"
   exit 2
 fi
 dirty="$(env "${export_git[@]}" git -C "$repo" status --porcelain --untracked-files=no | cut -c4- | tr '\n' ' ')"
 dirty="${dirty% }"
 if [[ -n "$dirty" ]]; then
-  echo "implement: uncommitted changes not yours: $dirty"
+  echo "implement-detach: uncommitted changes not yours: $dirty"
   prompt="$prompt
 These tracked files had uncommitted changes when you started; they are not yours:
 $dirty. Don't edit, stage or commit them. If your task needs one, write it under \"Open points\" and stop."
@@ -56,7 +56,7 @@ prompt="$prompt
 $project is its own git repo and you run from the factory root: run git only as
 \`git -C $project <command>\` (add, commit, status, log, diff), with paths relative to $project."
 
-echo "implement: $project -> $log"
+echo "implement-detach: $project -> $log"
 g="git -C $project"
 # --allowedTools / --disallowedTools take several values: "--" keeps the prompt out of them
 env "${export_git[@]}" \

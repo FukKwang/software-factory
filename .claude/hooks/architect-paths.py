@@ -3,8 +3,8 @@
 
 Allowed: <project>/docs/design*.md (design.md, design-phase2.md, docs/design/*.md),
 <project>/docs/handoff.md (the board) and ~/.claude/projects/*/memory/*.md.
-Subagents named implementer or grunt are let through (the hook input carries
-their agent_id/agent_type). /implement runs implementer headless, outside this hook.
+Builders forked from the architect session (/implement -> implementer, which
+spawns grunt) are let through: the hook input carries their agent_id/agent_type.
 Anything else is blocked (exit 2); the reason goes back to the agent.
 """
 import json
@@ -32,8 +32,8 @@ print(
     f"architect: blocked write to {path}. The architect only writes "
     "<project>/docs/design.md, the board in <project>/docs/handoff.md (and "
     "memory). Put the change in the design doc, update the board, and tell the "
-    "user to run `/implement <project>` here or send `next <project>` in the "
-    "implementer session.",
+    "user to run `/implement <project>` (or `/implement-detach <project>`) here "
+    "or send `next <project>` in the implementer session.",
     file=sys.stderr,
 )
 sys.exit(2)

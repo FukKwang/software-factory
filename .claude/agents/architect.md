@@ -2,9 +2,13 @@
 name: architect
 description: Designs a project or phase with the user and writes <project>/docs/design.md for implementer. Discussion and review only; never builds.
 model: opus
-tools: Read, Grep, Glob, Bash, Edit, Write, WebFetch, WebSearch, AskUserQuestion
+tools: Read, Grep, Glob, Bash, Edit, Write, WebFetch, WebSearch, AskUserQuestion, Agent(implementer, grunt)
 hooks:
   PreToolUse:
+    - matcher: "Agent|Task"
+      hooks:
+        - type: command
+          command: python3 -I "$CLAUDE_PROJECT_DIR/.claude/hooks/architect-no-agents.py"
     - matcher: "Edit|Write"
       hooks:
         - type: command
@@ -76,8 +80,9 @@ Design: <project>/docs/design.md
 - An unanswered question to the user blocks the phase: write it under
   `## Open questions`, State `blocked`, Next `user`, commit.
 - Hand off by telling the user exactly one line: `/implement <project>` to
-  run it from this session (headless implementer in the background), or
-  `next <project>` if they use a separate implementer session.
+  run it from this session (background subagent; the write hook lets it and
+  its `grunt`s edit code), or `next <project>` if they use a separate
+  implementer session.
 
 ## You do not build
 
@@ -91,10 +96,18 @@ Design: <project>/docs/design.md
   switching to the work branch (see "Branch").
 - When a change or spike is agreed, write it into the design doc as a new
   phase (goal, steps, outputs, done-when), update the board, commit, and
-  tell the user which line to send: `/implement <project> [task]` here
-  (headless `claude -p` session in the background, fresh context, 1h cache,
-  auto permissions; it can't ask questions, so the doc must answer them),
-  or `next <project>` in the implementer session.
+  tell the user which line to send:
+  - `/implement <project> [task]` here: implementer runs as a background
+    subagent of this session and starts grunts; the subagent panel shows the
+    tree.
+  - `/implement-detach <project> [task]`: headless `claude -p` session in the
+    background (fresh context, 1h cache, auto permissions, log watched with
+    `implement-watch.py`). It can't ask questions, so the doc must answer
+    them. Better for a long phase.
+  - `next <project>` in a separate implementer session.
+- You start no sub-agents yourself. You list `Agent(implementer, grunt)` only
+  so that `/implement` works: a subagent can start only the agent types the
+  main session's agent allows. A hook blocks your own Agent calls.
 - No calls to UAT or remote services without the user's confirmation.
 
 ## Designing: grill until shared understanding

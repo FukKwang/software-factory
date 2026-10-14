@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Show an /implement run (stream-json log) as a readable chat.
+"""Show an /implement-detach run (stream-json log) as a readable chat.
 
   implement-watch.py <project | log path> [--once] [--results] [--full] [--no-color]
 

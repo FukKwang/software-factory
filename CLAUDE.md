@@ -22,7 +22,7 @@ This folder holds many independent projects. Each top-level folder is one projec
 ## Workflow: design with Opus, implement with Sonnet and Haiku
 
 1. Main session (Opus, best as `claude --agent architect`): discuss the requirements and the design with the user. When the user approves the design, write it to `<project>/docs/design.md`.
-2. The user runs `/implement <project> [task]`. It starts `implementer` as a headless background session (`claude -p`), not as a subagent: a subagent cannot start subagents, so it could not delegate to `grunt`. The `implementer` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. implementer commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
+2. The user runs `/implement <project> [task]` (background subagent) or `/implement-detach <project> [task]` (headless session). The `implementer` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. implementer commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
 3. `implementer` updates the board and returns a summary. Review it in the main session against the design.
 
 Shared state between the architect and implementer sessions is the board at the top of `<project>/docs/handoff.md` (`## Now`, `## Open questions`, `## Log`) plus git. Both read it on every message and update and commit it when they hand over. All new work goes on a branch (recorded as `Branch:` on the board), never on `master`/`main`; commit explicit paths only, never `git add -A`.
@@ -35,10 +35,13 @@ Subagents do not see this conversation. The design file is the only handoff, so 
 
 | Mode | How to run it | Prompt cache TTL |
 |---|---|---|
-| Unattended (default) | In the Opus session: `/implement <project> <task>` (headless `claude -p --agent implementer --permission-mode auto` in the background, fresh context, log in `.claude/runs/`) | 1 h (main session) |
+| Subagent (default) | In the Opus session: `/implement <project> <task>`. implementer runs as a background subagent and starts grunts; the subagent panel shows the tree. | 5 min |
+| Detached | In the Opus session: `/implement-detach <project> <task>` (headless `claude -p --agent implementer --permission-mode auto` in the background, fresh context, log in `.claude/runs/`, watch with `python3 -I .claude/tools/implement-watch.py <project>`). For long phases. | 1 h (main session) |
 | Interactive | New terminal in this folder: `claude --agent implementer`, then `next <project>` (builds the phase on the board) | 1 h (main session) |
 
-- Waiting costs nothing; the first turn after a wait of more than 5 minutes rewrites the context to cache (about context size x $2.50/MTok on Sonnet 5.5). At 30k context that is about $0.08 per wait; at 150k about $0.38. A 1h TTL pays off only above about 3 such waits per run.
+A subagent can start only the agent types the main session's agent allows. So the session that runs `/implement` must allow `implementer` and `grunt`: `architect.md` lists `Agent(implementer, grunt)` (a hook stops the architect from using it itself), and plain `claude` allows all agents. Without that, implementer gets no Agent tool and does grunt's work itself.
+
+- Waiting costs nothing; the first turn after a wait of more than 5 minutes rewrites the context to cache (about context size x $2.50/MTok on Sonnet 5.5). At 30k context that is about $0.08 per wait; at 150k about $0.38. A 1h TTL pays off only above about 3 such waits per run, so `/implement` keeps the 5 min default.
 - In any implementer session the context limit still applies: at about 150k, implementer updates `docs/handoff.md` and commits; then run `/clear` and tell it to continue from the handoff.
 - The handoff between sessions is always the files: `docs/design.md` (Opus writes), the board in `docs/handoff.md` (both update) and the git log. The Opus review reads those, plus `git diff`.
 - To give subagents a 1h TTL for one session only, start it with `CLAUDE_CODE_SUBAGENT_PROMPT_CACHE_TTL=1h claude`.
