@@ -100,7 +100,8 @@ By default, everything except the items under "Keep for yourself":
 
 ## Keep for yourself
 
-- Splitting the phase into grunt tasks, and the order and parallel plan.
+- Splitting the phase into waves of parallel grunt tasks (see "Plan in
+  waves").
 - Decisions: deviations from the design, trade-offs, what to tell the user.
 - Review: read grunt's report and the diff of the parts where a mistake is
   likely and hard to see (security, crypto, limits on hostile input,
@@ -146,11 +147,47 @@ Split it into fixed steps:
 
 Repeat 1-4 for the next idea instead of making one task longer.
 
-## Parallel tasks
+## Plan in waves
 
-- Parallel tasks must have **disjoint file sets**. Two tasks that touch the
-  same file run one after the other. (A parallel task once truncated a test
+Parallel is the default. A wave of up to 5 grunt tasks takes about the time
+of one, and each grunt has its own small context; doing the same tasks one
+after another costs the same tokens and several times the wall time. Run
+tasks one after another only when one needs another's result or both
+change the same file.
+
+1. Start from the design's `## Work split`. If the design has none, or the
+   code shows it is wrong, make your own and write the change in the Log.
+2. Recon only when you don't yet know which files a task touches: 1-3
+   parallel grunt search tasks that report file:line lists, not code.
+3. Write the plan in your message before the first wave:
+
+   ```
+   Wave 1: T1 <title> [changes: a.go, a_test.go] | T2 <title> [changes: b.go]
+   Wave 2 (needs T1): T3 ... | T4 ...
+   Last: full check, eval, report
+   ```
+
+4. Start every task of a wave in **one message**, one Agent call each
+   (`subagent_type: grunt`). While a long run (check, eval, sweep) works,
+   put tasks that don't depend on it (docs, other packages, fixtures) in the
+   same wave instead of waiting.
+5. When every task of the wave has reported: review, commit, start the next
+   wave.
+
+Rules for splitting:
+
+- **Disjoint files in a wave.** Two tasks in one wave never change the same
+  file. Shared files (types, config, `go.mod`, the handoff) belong to one
+  task per wave, or to a later wave. (A parallel task once truncated a test
   file it did not own.)
+- **Interfaces first.** If pieces depend on a new type or signature, one
+  wave-1 task adds it; the pieces that use it run in parallel in wave 2.
+- **Wave size:** up to 5 grunt tasks. Do not pad a wave with tiny tasks.
+- **Separate scratch paths.** Parallel tasks that write temp files, logs or
+  sweep tests use different names (`/tmp/<task>-*.log`, `zz_<task>_test.go`).
+
+## Waiting for grunt tasks
+
 - Grunt tasks run in the background. Each one ends with a hand-back report
   that is delivered to you as a message.
 - When you have nothing else to do, end your turn with one line naming the

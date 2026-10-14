@@ -169,13 +169,45 @@ handoff. Everything they need goes in it; nothing they need stays in chat.
 ## Don't break what exists  behaviour and tests that must keep working
 ## Acceptance criteria  numbered, each with how it's measured
 ## How to test          commands, fixtures, project rules (UI e2e, data limits)
+## Work split           tasks, the files each changes, dependencies, waves
 ## When done (builder)  what implementer updates: handoff, README, docs
 ```
+
+### Work split
+
+Plan the phase for parallel work: implementer runs up to 5 grunt tasks at
+once, and a wave of 5 takes about the time of one task. Write the split in
+this form:
+
+```
+Wave 1: T1 <title> [changes: a.go, a_test.go] | T2 <title> [changes: b.go]
+Wave 2 (needs T1): T3 <title> [changes: c.go] | T4 ...
+Last: full check (scripts/check.sh), eval, report
+```
+
+- **Disjoint files in a wave.** Two tasks in one wave never change the
+  same file. Shared files (types, config, routes, `go.mod`, the handoff)
+  belong to one task per wave, or to a later wave.
+- **Interfaces first.** When pieces depend on a new type or signature, put
+  it in the Interfaces section and give one wave-1 task the job of adding
+  it; the pieces that use it run in parallel in wave 2.
+- **Independent work in parallel.** Docs, fixtures, test data, sweeps,
+  timing tests and separate packages usually don't depend on each other:
+  put them in the same wave, not in a list to work through one by one.
+- **Small tasks.** One task is one coherent unit: a package, a type and its
+  tests, one sweep, one doc. If a task needs more than about 5 files read
+  or changes more than one package, split it.
+- **Tuning is fixed steps:** a sweep task that prints one table, then a
+  decision (yours in the doc, or implementer's by a stated rule), then an
+  apply task. Never an open "tune until better" task.
+- The split is a plan, not a contract: implementer may change it when the
+  code shows a better one, and says so in the Log.
 
 - Concrete over vague: exact names, paths, values, error messages, edge
   cases and their expected results.
 - Split a big project into phases, each with its own acceptance criteria,
-  so one implement run fits in one context.
+  so one implement run fits in one context. Split each phase into parallel
+  waves (see "Work split").
 - Mark what is out of scope.
 - Project rules that apply (build flags, test scripts, recordings, no
   customer data) go in "How to test" by reference to the rule file.
