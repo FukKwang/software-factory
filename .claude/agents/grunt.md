@@ -34,9 +34,29 @@ follow their interfaces and rules exactly.
   to a file (`> /tmp/<name>.log 2>&1`) and read only the end and the failure
   lines with `tail` or `grep`. Use a Bash timeout of 600000 ms. If a run moves
   to the background, wait for it, then read the log.
+- Run only the checks the task names. No full check, `./...` or `-race`
+  unless the task asks for it: other grunts may be running heavy jobs, and
+  the lead runs the full check once at the end.
+- Waiting for a long run: one `until grep -q <done marker> <log>; do sleep
+  10; done` with a Bash timeout of 600000 ms. Never `sleep N` by itself
+  (it is blocked).
+- Timing tests and benchmarks: run them only when the task says. Report
+  `uptime` (load average) next to the figures: a loaded machine makes
+  them fail.
+- Scratch files use the task's name (`/tmp/<task>-*.log`,
+  `zz_<task>_test.go`): parallel grunts write their own.
 - Read big files in parts (offset and limit, or `grep -n`), not whole.
   For a file over 300 lines, find what you need with `grep -n` first and
   read only those parts.
+
+## Sweeps
+
+A sweep computes each item's scores **once**, writes them to a file
+(`/tmp/<task>-scores.tsv`), and prints the table for every candidate
+setting from that file. Never rerun the detector or the whole test for
+each setting: that turns seconds into tens of minutes. If the code does not
+expose the score you need, add the smallest hook the task allows (a test
+helper or a trace field), or stop and report.
 
 ## Budget
 

@@ -199,7 +199,15 @@ Last: full check (scripts/check.sh), eval, report
   or changes more than one package, split it.
 - **Tuning is fixed steps:** a sweep task that prints one table, then a
   decision (yours in the doc, or implementer's by a stated rule), then an
-  apply task. Never an open "tune until better" task.
+  apply task. Never an open "tune until better" task. The sweep computes
+  scores once and thresholds them from a file; it never reruns the
+  detector per setting.
+- **One heavy job per wave.** Full checks, evals, corpus runs and timing
+  tests use all cores and slow each other down (a timing test failed while
+  other jobs ran). Give each wave at most one; timing tests and benchmarks get a wave
+  of their own.
+- **Full check once, at the end** (`Last:` line). A phase plans for at most
+  2 full check runs.
 - The split is a plan, not a contract: implementer may change it when the
   code shows a better one, and says so in the Log.
 
@@ -208,6 +216,15 @@ Last: full check (scripts/check.sh), eval, report
 - Split a big project into phases, each with its own acceptance criteria,
   so one implement run fits in one context. Split each phase into parallel
   waves (see "Work split").
+- Size a phase by wall time, not only by context: aim for about 30-40
+  minutes. Add up the slow steps (full check, eval, corpus generation,
+  sweeps; the handoff records how long they take) plus about 5 minutes per
+  wave of code. If the sum is over about 40 minutes, split the phase.
+  (Phase 6A-finish of go-pdf-doc-parser had 7 items with a 10-minute check,
+  a 20-minute sweep, an eval and Docker work, and ran over 70 minutes.)
+- If the project's full check takes more than about 5 minutes, plan a
+  phase that speeds it up (parallel steps, a quick mode for during a
+  phase, no duplicate test runs) before more feature phases.
 - Mark what is out of scope.
 - Project rules that apply (build flags, test scripts, recordings, no
   customer data) go in "How to test" by reference to the rule file.

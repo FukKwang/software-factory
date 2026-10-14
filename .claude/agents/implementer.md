@@ -139,8 +139,12 @@ Grunt then runs its own experiments, and every probe stays in its context
 (three copy-move tasks reached 160k tokens and 20-56 minutes this way).
 Split it into fixed steps:
 
-1. Grunt writes a sweep script or test that runs all candidate settings
-   and prints one results table.
+1. Grunt writes a sweep script or test that computes each item's scores
+   **once**, saves them to a file, and prints the table for every candidate
+   setting from that file. Never a sweep that reruns the detector for each
+   setting: one such copy-move sweep took 20 minutes, where thresholding
+   saved scores takes seconds. Settings that change the computation itself
+   (window size, a filter) get as few values as the decision needs.
 2. Grunt runs it and reports only the table.
 3. You pick the settings or the next idea.
 4. Grunt makes the chosen change and runs the check.
@@ -171,6 +175,10 @@ change the same file.
    (`subagent_type: grunt`). While a long run (check, eval, sweep) works,
    put tasks that don't depend on it (docs, other packages, fixtures) in the
    same wave instead of waiting.
+   A wave lasts as long as its slowest task: in one run a 2-minute sweep
+   waited 19 minutes for a 21-minute one. Put tasks of similar length in a
+   wave, and give the short tasks of a long wave enough work (the next
+   independent items) that they are not idle.
 5. When every task of the wave has reported: review, commit, start the next
    wave.
 
@@ -183,6 +191,13 @@ Rules for splitting:
 - **Interfaces first.** If pieces depend on a new type or signature, one
   wave-1 task adds it; the pieces that use it run in parallel in wave 2.
 - **Wave size:** up to 5 grunt tasks. Do not pad a wave with tiny tasks.
+- **One heavy command at a time.** Full checks, `-race`, evals, corpus
+  runs, sweeps over many files, timing tests and benchmarks use all cores;
+  two at once each run slower, and timing tests can fail (an AC-N8 p95 test
+  measured 585 ms against a 400 ms bar at load average 2). Give at most
+  one such task per wave; the other tasks of the wave write code, docs or
+  fixtures and run only their package's fast tests. Timing tests and
+  benchmarks run in a wave of their own.
 - **Separate scratch paths.** Parallel tasks that write temp files, logs or
   sweep tests use different names (`/tmp/<task>-*.log`, `zz_<task>_test.go`).
 
@@ -216,10 +231,21 @@ session ends and every background task dies with it.
 
 ## Tests during a phase
 
-- While building: grunt runs the tests of the package it changed.
+A full check is the most expensive step of a phase (go-pdf-doc-parser's
+`scripts/check.sh` takes about 10 minutes); each extra full run adds that
+much wall time.
+
+- While building: grunt runs only the tests of the package it changed, or
+  the named tests (`go test ./pkg -run 'TestA|TestB'`). Never the full
+  check or `./...` in a build task.
 - At the end of the phase: one grunt task runs the full `scripts/check.sh`
   (and the eval if the phase has one) and reports failures and the
-  acceptance figures. Fix and re-run until green, then commit.
+  acceptance figures.
+- After a fix: rerun only the failed tests and the changed package. Run the
+  full check again once, when all of them pass. Plan for at most 2 full
+  checks per phase; if a third is needed, say why in the Log.
+- A slow check (over about 5 minutes) is a finding: note it for the
+  architect under `## Open questions` with what takes the time.
 
 ## Finish
 
