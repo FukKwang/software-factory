@@ -169,6 +169,9 @@ def show(ev):
     a = agent(key)
     pad = a["pad"]
     if kind == "system" and ev.get("subtype") == "init":
+        if ev.get("session_id") in sessions:
+            return False  # a resume of the same session (after a background report)
+        sessions.add(ev.get("session_id"))
         print(c("1", f"── session {ev.get('session_id', '?')}, {family(ev.get('model'))}"))
     elif kind == "assistant":
         msg = ev.get("message", {})
@@ -211,12 +214,24 @@ def show(ev):
                 n = text.count("\n") + 1
                 print(f"{pad}    {dim(f'→ {n} lines: ' + one_line(text, WIDTH - len(pad) - 20))}")
     elif kind == "result" and not key:
-        cost = ev.get("total_cost_usd")
-        summary(ev.get("modelUsage"))
-        print(c("1", f"── end: {ev.get('subtype', '?')}, {ev.get('num_turns', '?')} turns"
-                + (f", ${cost:.2f}" if isinstance(cost, (int, float)) else "")))
-        return True
+        # one per turn: a headless session that waits for background subagents ends a turn,
+        # is resumed by their reports, and writes another result; the run ends when the
+        # process does (see main)
+        global last_result
+        last_result = ev
     return False
+
+
+last_result = None
+last_event_result = False
+sessions = set()
+
+
+def end(reason):
+    ev = last_result or {}
+    cost = ev.get("total_cost_usd")
+    summary(ev.get("modelUsage"))
+    print(c("1", f"── {reason}" + (f", ${cost:.2f}" if isinstance(cost, (int, float)) else "")))
 
 
 def lines(path):
@@ -236,13 +251,16 @@ def lines(path):
                 time.sleep(0.5)
 
 
-def running(path):
-    """False when the run's state file says it finished (or the run is gone)."""
+def running(path, idle):
+    """False when the run's state file says it finished (or the run is gone).
+
+    Without a state file (a log path from elsewhere): finished once the last
+    event was a result and nothing came for 30 s."""
     try:
         with open(path[:-4] + ".json") as f:
             st = json.load(f)
     except (OSError, ValueError):
-        return True
+        return not (last_event_result and idle >= 60)
     if st.get("status") != "running":
         return False
     try:
@@ -260,12 +278,12 @@ def main():
         for raw in lines(log):
             if raw is None:
                 idle += 1
-                if idle % 10 == 0 and not running(log):
-                    summary()
-                    print(c("1", "── run is not running any more"))
+                if idle % 10 == 0 and not running(log, idle):
+                    end("run ended")
                     return
                 continue
             idle = 0
+            global last_event_result
             if not raw.startswith("{"):
                 print(rel(raw.rstrip()))
                 continue
@@ -273,14 +291,13 @@ def main():
                 ev = json.loads(raw)
             except ValueError:
                 continue
-            if show(ev):
-                return
+            show(ev)
+            last_event_result = ev.get("type") == "result" and not ev.get("parent_tool_use_id")
             sys.stdout.flush()
-        summary()  # --once: the log ended before the run did
+        end("end of log so far" if not last_event_result else "end of log")  # --once
     except KeyboardInterrupt:
         print()
-        summary()
-        print(c("1", "── stopped watching (the run goes on)"))
+        end("stopped watching (the run goes on)")
 
 
 try:

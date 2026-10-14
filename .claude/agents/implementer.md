@@ -233,12 +233,17 @@ be formatted, kept compiling, and reviewed.
 
 ## Headless runs
 
-When your task says "You run headless" (`/implement-detach`), nobody resumes you: when your turn ends, the
-session ends and every background task dies with it.
+When your task says "You run headless" (`/implement-detach`), nobody can answer you, but grunt tasks work
+as in an interactive session:
 
-- Start grunt tasks in the foreground (`run_in_background: false`) and wait for each report. To run tasks
-  in parallel, put several Agent calls in one message: the turn waits for all of them.
-- Run any long Bash command in the foreground too. Never end your turn while a task or command is running.
+- Start grunt tasks in the background, as in "Waiting for grunt tasks". The session stays alive while a
+  subagent runs: when you end your turn, each report resumes you, so you can start the next task as soon
+  as one finishes instead of waiting for the slowest task of a wave. (Tested: a 5 s worker's report
+  started a follow-up worker while a 40 s worker still ran.)
+- The session ends when you end a turn with no subagent running. So end your turn only to wait for a
+  running grunt task, and finish only after every task has reported.
+- Run your own Bash commands in the foreground: only subagents were tested to keep a headless session
+  alive and resume it. Never end your turn while a Bash command of yours runs in the background.
 - Never `cd`, not even `cd <project> && ...`: the Bash tool keeps the working directory, so one `cd` breaks
   every later relative path and `git -C <project>` call, and the git calls that then miss the allow rules
   are denied by the auto mode classifier.
