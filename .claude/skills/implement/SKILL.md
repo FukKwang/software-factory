@@ -2,8 +2,8 @@
 description: Hand the approved design of a project to the Sonnet implementation lead.
 argument-hint: <project-folder> [extra instructions]
 context: fork
-agent: impl-lead
-background: false
+agent: implementer
+background: true
 disable-model-invocation: true
 ---
 Project folder and instructions: $ARGUMENTS

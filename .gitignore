@@ -10,3 +10,4 @@
 # Personal settings and generated files
 /.claude/settings.local.json
 __pycache__/
+/.claude/runs/
