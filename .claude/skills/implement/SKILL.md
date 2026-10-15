@@ -4,7 +4,6 @@ argument-hint: <project-folder> [extra instructions]
 context: fork
 agent: implementer
 background: true
-disable-model-invocation: true
 ---
 Project folder and instructions: $ARGUMENTS
 

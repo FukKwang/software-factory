@@ -20,8 +20,8 @@ if data.get("tool_name") not in ("Agent", "Task") or data.get("agent_id"):
 
 reason = (
     "Blocked: the architect starts no sub-agents. Find facts yourself (Read, "
-    "Grep, git). To build, tell the user to run `/implement <project>` or "
-    "`/implement-detach <project>`."
+    "Grep, git). To build, commit the board as ready-to-build and call "
+    "Skill(\"implement\", \"<project>\")."
 )
 print(json.dumps({
     "hookSpecificOutput": {

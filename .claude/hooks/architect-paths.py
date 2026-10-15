@@ -31,9 +31,8 @@ if design or memory:
 print(
     f"architect: blocked write to {path}. The architect only writes "
     "<project>/docs/design.md, the board in <project>/docs/handoff.md (and "
-    "memory). Put the change in the design doc, update the board, and tell the "
-    "user to run `/implement <project>` (or `/implement-detach <project>`) here "
-    "or send `next <project>` in the implementer session.",
+    "memory). Put the change in the design doc, update the board, commit, and "
+    "start the build with Skill(\"implement\", \"<project>\").",
     file=sys.stderr,
 )
 sys.exit(2)

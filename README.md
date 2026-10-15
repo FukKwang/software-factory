@@ -38,9 +38,13 @@ cost several dollars per lead run cost $0.41. Details in
    work branch, and commits both files. Subagents do not see the
    conversation, so the design file must be complete.
 4. Implement:
-   - `/implement my-app <task>`. `implementer` runs as a background
-     subagent of your session and starts `grunt` subagents; the subagent
-     panel shows the tree. It reports when done.
+   - The architect starts `/implement my-app` itself once you confirm the
+     design (autopilot). `implementer` runs as a background subagent of your
+     session and starts `grunt` subagents; the subagent panel shows the
+     tree. When it finishes, the architect reviews the build and starts the
+     next already-designed phase if every criterion passed (at most 2 builds
+     per message from you). It stops for you on a failure, an open question
+     or a new design decision. You can also type `/implement my-app <task>`.
    - `/implement-detach my-app <task>`, for a long phase. `implementer` runs
      as a headless `claude -p --permission-mode auto` session in the
      background, with a fresh context and the main-session prompt cache
@@ -50,7 +54,7 @@ cost several dollars per lead run cost $0.41. Details in
    - Or keep two sessions: `claude --agent implementer` in a new terminal,
      then send `next my-app`. It reads the board, builds the phase on it,
      and hands back through the board.
-5. Review in the Opus session: read the board in `my-app/docs/handoff.md`,
+5. Review (the architect does this on its own in autopilot): read the board in `my-app/docs/handoff.md`,
    `git log` and `git diff`. Run the project's checks yourself; summaries
    can be wrong.
 
@@ -59,14 +63,15 @@ cost several dollars per lead run cost $0.41. Details in
 | Path | What it is |
 |------|------------|
 | `CLAUDE.md` | Rules and workflow for Claude in this folder. |
-| `.claude/settings.json` | Opus as the main model. Put personal settings in `.claude/settings.local.json` (not committed). |
-| `.claude/agents/architect.md` | Opus architect: grills you on the design, writes `docs/design.md`, reviews builds. Never builds. |
+| `.claude/settings.json` | Opus as the main model; the `architect-launch-guard.py` hook. Put personal settings in `.claude/settings.local.json` (not committed). |
+| `.claude/agents/architect.md` | Opus architect: grills you on the design, writes `docs/design.md`, starts `/implement` itself and reviews builds (autopilot). Never writes code. |
 | `.claude/hooks/architect-paths.py` | Blocks the architect's Edit/Write outside `docs/design*.md`, `docs/handoff.md` and memory; lets `implementer`/`grunt` forked from its session through. |
 | `.claude/agents/implementer.md` | Sonnet lead: plans, delegates, reviews. Hard rules on context size. |
 | `.claude/agents/grunt.md` | Haiku worker: implements fully specified tasks, runs checks, short reports. |
 | `.claude/agents/manager.md`, `.claude/skills/manager/SKILL.md` | Sonnet dispatcher for straightforward tasks without a design: `claude --agent manager` or `/manager <task>`. Splits the task into waves of up to 5 parallel grunts. |
 | `.claude/hooks/manager-grunt-only.py` | Blocks any manager sub-agent other than `grunt`. |
 | `.claude/skills/implement/SKILL.md` | The `/implement <project> [task]` command: implementer as a background subagent. |
+| `.claude/hooks/architect-launch-guard.py` | Hook in `settings.json` for every session: lets the model call the `implement` skill only when the board says `ready-to-build` / `implementer`, the project tree is clean, and it is on the board's branch (not main/master). |
 | `.claude/hooks/architect-no-agents.py` | Blocks the architect's own Agent calls. architect lists `Agent(implementer, grunt)` only so `/implement` can start grunt. |
 | `.claude/skills/implement-detach/SKILL.md`, `.claude/tools/implement-detach.sh` | The `/implement-detach <project> [task]` command: headless implementer in the background. |
 | `.claude/tools/implement-watch.py` | Shows an `/implement-detach` run as a readable chat: implementer's text, tool calls and results, grunt runs indented, context size on each line, and tokens per agent (turns, peak context, new input, cache reads, output, model) when each grunt ends and at the end. Follows the log live; `--once` prints a snapshot, `--full` keeps long text. |

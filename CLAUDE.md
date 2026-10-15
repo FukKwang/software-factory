@@ -22,8 +22,8 @@ This folder holds many independent projects. Each top-level folder is one projec
 ## Workflow: design with Opus, implement with Sonnet and Haiku
 
 1. Main session (Opus, best as `claude --agent architect`): discuss the requirements and the design with the user. When the user approves the design, write it to `<project>/docs/design.md`.
-2. The user runs `/implement <project> [task]` (background subagent) or `/implement-detach <project> [task]` (headless session). The `implementer` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. implementer commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
-3. `implementer` updates the board and returns a summary. Review it in the main session against the design.
+2. After the user confirms the design, the architect starts `/implement <project> [task]` itself (background subagent; `architect-launch-guard.py` allows it only from a committed `ready-to-build` board), reviews the result when it finishes, and starts the next already-designed phase if every criterion passed (at most 2 builds per user message). For a long phase the user runs `/implement-detach <project> [task]` (headless session). The `implementer` agent (Sonnet) plans the work and reviews it. The `grunt` agent (Haiku) writes most of the code, tests, and docs, and runs all long checks. implementer commits before each delegation, so grunt's changes can be reviewed with `git diff` and reverted.
+3. `implementer` updates the board and returns a summary. The architect reviews it against the design and stops for the user on a failed criterion, an open question, or a new design decision.
 
 Shared state between the architect and implementer sessions is the board at the top of `<project>/docs/handoff.md` (`## Now`, `## Open questions`, `## Log`) plus git. Both read it on every message and update and commit it when they hand over. All new work goes on a branch (recorded as `Branch:` on the board), never on `master`/`main`; commit explicit paths only, never `git add -A`.
 
