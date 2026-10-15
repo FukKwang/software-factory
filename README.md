@@ -72,7 +72,7 @@ cost several dollars per lead run cost $0.41. Details in
 | `.claude/hooks/manager-grunt-only.py` | Blocks any manager sub-agent other than `grunt`. |
 | `.claude/skills/implement/SKILL.md` | The `/implement <project> [task]` command: implementer as a background subagent. |
 | `.claude/hooks/architect-launch-guard.py` | Hook in `settings.json` for every session: lets the model call the `implement` skill only when the board says `ready-to-build` / `implementer`, the project tree is clean, and it is on the board's branch (not main/master). |
-| `.claude/hooks/architect-no-agents.py` | Blocks the architect's own Agent calls. architect lists `Agent(implementer, grunt)` only so `/implement` can start grunt. |
+| `.claude/hooks/architect-no-agents.py` | Lets the architect itself start only `grunt` (read-only tasks: fact finding, running checks, summing up diffs, to save Opus context); blocks a direct `implementer` start, so builds go through `/implement`. |
 | `.claude/skills/implement-detach/SKILL.md`, `.claude/tools/implement-detach.sh` | The `/implement-detach <project> [task]` command: headless implementer in the background. |
 | `.claude/tools/implement-watch.py` | Shows an `/implement-detach` run as a readable chat: implementer's text, tool calls and results, grunt runs indented, context size on each line, and tokens per agent (turns, peak context, new input, cache reads, output, model) when each grunt ends and at the end. Follows the log live; `--once` prints a snapshot, `--full` keeps long text. |
 | `.claude/tools/implement-stats.py` | Usage of `/implement-detach` runs: `finish` prints cost, tokens per model, subagents and permission denials at the end; `status` prints running and recent runs as JSON for a status line. |

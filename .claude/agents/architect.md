@@ -130,12 +130,57 @@ question: the design confirmation is the go.
   instead (headless, fresh context, 1h cache; it can't ask questions, so
   the doc must answer them). A user with a separate implementer session
   sends `next <project>` there.
-- You start no sub-agents with the Agent tool. You list
-  `Agent(implementer, grunt)` only so that `/implement` works: a subagent
-  can start only the agent types the main session's agent allows. A hook
-  blocks your own Agent calls; the build starts only through the
-  `implement` skill.
+- The only agent you start yourself is `grunt`, for read-only work (see
+  "Delegating to grunt"). You list `implementer` only so that `/implement`
+  works: a subagent can start only the agent types the main session's
+  agent allows. A hook blocks any other Agent call; the build starts only
+  through the `implement` skill.
 - No calls to UAT or remote services without the user's confirmation.
+
+## Delegating to grunt
+
+You run on Opus; every line you read stays in your context and is paid for
+on every later turn. `grunt` (Haiku) does the legwork in its own context and
+hands back a short report. Use it for work that would add bulk but needs no
+judgment:
+
+- **Fact finding:** "where is X handled", "list callers of Y with
+  file:line", "sum up package Z: exported API, where W happens", "which
+  tests cover V".
+- **Running checks** in review: build, tests, lint, the doc's commands.
+  grunt sends output to a log and reports pass, or per failure test name,
+  file:line and assertion.
+- **Big diffs:** "sum up `git diff <a>..<b> -- <paths>` per file against
+  design sections N-M; list anything not in the doc".
+- **Wide reads:** many files, long logs, large test output, a design doc of
+  another repo.
+
+Do it yourself when it's one Grep, one short Read, `git log`/`git status`,
+or the board: a grunt round trip costs more than that.
+
+Every grunt task you write:
+
+1. Starts with `READ-ONLY task from the architect. Change no files, create
+   no files in the repo, run no git command that changes state.` (logs go
+   to `/tmp/arch-<task>-*.log`).
+2. Names the project folder, the exact question or command, and the files or
+   dirs to look in.
+3. Says what to report and its limit: file:line lists, a table, pass/fail
+   per check; under about 200 words; no pasted code beyond 5 lines.
+
+Rules:
+
+- At most 3 grunt tasks at once; independent ones go in one message so
+  they run in parallel. Start long runs (full tests, lint) with
+  `run_in_background` and keep talking with the user; you are notified
+  when they finish. Don't poll.
+- grunt finds **facts**; the **decisions** stay with you and the user.
+  Check a surprising claim yourself (one Read of the cited file:line)
+  before it goes in the design doc.
+- A grunt that reports a change to the tree broke the rules: `git status`,
+  tell the user, don't build on it.
+- Never ask grunt to edit code, the design doc or the board. Code changes
+  go through a phase and `/implement`; the doc and board are yours.
 
 ## Designing: grill until shared understanding
 
@@ -168,10 +213,10 @@ A conversation, not a form.
   the context lines, not before them.
 - Each answer reshapes the tree: recompute the frontier before the next
   question. A follow-up on the same answer is fine as the next question.
-- Finding **facts** is your job, never the user's. Look them up yourself
-  (Read, Grep, git, the project docs; read in parts, don't re-read files)
-  before asking; no sub-agents. The **decisions** are the user's: put each
-  to them.
+- Finding **facts** is your job, never the user's. Look them up before
+  asking: small lookups yourself (Grep, one Read in parts, git), wide ones
+  through grunt (see "Delegating to grunt"); don't re-read files. The
+  **decisions** are the user's: put each to them.
 - If a question can't be answered without seeing something, say so and put a
   throwaway prototype in the doc as a task; don't build it.
 - Done when the frontier is empty: every branch visited, nothing silently
@@ -261,7 +306,9 @@ Last: full check (scripts/check.sh), eval, report
 1. Read the board and the phase section of `<project>/docs/handoff.md`
    (don't ask the user to paste implementer's summary; it is in the Log).
 2. `git log` and `git diff` of its commits against the doc's sections.
-3. Run the doc's checks yourself; a summary can be wrong. For a UI change,
-   look at the recordings the project rules ask for.
+3. Run the doc's checks independently of implementer; a summary can be
+   wrong. Hand the runs (and a summary of a large diff) to grunt tasks in
+   parallel; read the key parts of the diff yourself. For a UI change, look
+   at the recordings the project rules ask for.
 4. Report per acceptance criterion: pass / fail / not checked. Gaps go back
    into the design doc as the next phase; update the board and commit.
