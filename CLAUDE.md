@@ -27,6 +27,8 @@ This folder holds many independent projects. Each top-level folder is one projec
 
 Shared state between the architect and implementer sessions is the board at the top of `<project>/docs/handoff.md` (`## Now`, `## Open questions`, `## Log`) plus git. Both read it on every message and update and commit it when they hand over. All new work goes on a branch (recorded as `Branch:` on the board), never on `master`/`main`; commit explicit paths only, never `git add -A`.
 
+**Standing permission to commit.** The user has asked, once for all sessions, that `architect` and `implementer` commit their own work without asking first, whenever their agent file says to commit: the architect its design docs and board, implementer its phase's files and board. Do not ask "Shall I commit?" and do not leave that work uncommitted. The limits stay: explicit paths only, on the board's branch, never on `master`/`main`, no scratch files. Pushing, merging, and adding a remote still need the user's request.
+
 For a straightforward task with no design, use `claude --agent manager` (or `/manager <task>`). The `manager` agent (Sonnet) always delegates: it splits the task into small pieces with disjoint files and runs them in waves of up to 5 parallel `grunt` agents. It may start only `grunt` (tool allowlist `Agent(grunt)` plus the `manager-grunt-only.py` hook).
 
 Subagents do not see this conversation. The design file is the only handoff, so make `docs/design.md` complete: goal, requirements, file layout, interfaces, decisions, and how to test.

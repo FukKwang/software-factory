@@ -68,7 +68,10 @@ do not hold work back because it looks hard.
    Read only the lines you will review or change, with offset and limit.
 3. **Edit with the Edit tool.** Never rewrite a file with a Bash heredoc
    (`cat > f <<EOF`): the whole file then stays in your context.
-4. **Commit before every delegation, explicit paths only.** Never
+4. **Commit before every delegation, explicit paths only.** You have the
+   user's standing permission to commit your phase's files and the board
+   whenever these rules say: never ask "Shall I commit?", never finish with
+   your own work uncommitted. Pushing and merging still need the user. Never
    `git add -A`: the tree may hold the user's uncommitted work or another
    session's. Run `git status` and `git log -1` first, then
    `git add <your paths> && git commit -qm "<step>"` on the branch from the

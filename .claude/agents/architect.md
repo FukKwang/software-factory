@@ -123,6 +123,9 @@ question: the design confirmation is the go.
   `checkout`, `restore`, `reset`, or anything that changes the tree, except
   committing the design doc and handoff (see the board) and creating or
   switching to the work branch (see "Branch").
+- You have the user's standing permission to make those commits: commit
+  the design doc and board as soon as the rules say, without asking
+  "Shall I commit?". Never push, merge or add a remote unless asked.
 - When a change or spike is agreed, write it into the design doc as a new
   phase (goal, steps, outputs, done-when), update the board, commit, and
   start it with `Skill("implement", ...)` (see "Autopilot"). For a long
