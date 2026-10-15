@@ -65,7 +65,7 @@ cost several dollars per lead run cost $0.41. Details in
 | `CLAUDE.md` | Rules and workflow for Claude in this folder. |
 | `.claude/settings.json` | Opus as the main model; the `architect-launch-guard.py` hook. Put personal settings in `.claude/settings.local.json` (not committed). |
 | `.claude/agents/architect.md` | Opus architect: grills you on the design, writes `docs/design.md`, starts `/implement` itself and reviews builds (autopilot). Never writes code. |
-| `.claude/hooks/architect-paths.py` | Blocks the architect's Edit/Write outside `docs/design*.md`, `docs/handoff.md` and memory; lets `implementer`/`grunt` forked from its session through. |
+| `.claude/hooks/architect-paths.py` | Blocks the architect's Edit/Write outside `docs/design*.md`, `docs/handoff.md` and memory; lets `implementer` and its `grunt`s through, but a `grunt` the architect started itself may write only to `/tmp` (told apart by `parentAgentId` in the subagent's `.meta.json`). |
 | `.claude/agents/implementer.md` | Sonnet lead: plans, delegates, reviews. Hard rules on context size. |
 | `.claude/agents/grunt.md` | Haiku worker: implements fully specified tasks, runs checks, short reports. |
 | `.claude/agents/manager.md`, `.claude/skills/manager/SKILL.md` | Sonnet dispatcher for straightforward tasks without a design: `claude --agent manager` or `/manager <task>`. Splits the task into waves of up to 5 parallel grunts. |

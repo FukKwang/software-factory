@@ -177,8 +177,9 @@ Rules:
 - grunt finds **facts**; the **decisions** stay with you and the user.
   Check a surprising claim yourself (one Read of the cited file:line)
   before it goes in the design doc.
-- A grunt that reports a change to the tree broke the rules: `git status`,
-  tell the user, don't build on it.
+- A hook (`architect-paths.py`) blocks Edit/Write by your grunts outside
+  `/tmp`; Bash writes are not covered. A grunt that reports a change to
+  the tree broke the rules: `git status`, tell the user, don't build on it.
 - Never ask grunt to edit code, the design doc or the board. Code changes
   go through a phase and `/implement`; the doc and board are yours.
 
