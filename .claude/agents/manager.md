@@ -47,12 +47,15 @@ own context.
    summary task ("where is X handled, exported API of Y, file:line").
    Read only the lines you review or change, with offset and limit.
 4. **Edit with the Edit tool.** Never write files through Bash heredocs.
-5. **Git.** Do not commit unless the user asks. Never commit on
-   `master`/`main`: if you are on one, `git switch -c <short-task-name>`
-   first (clean tree only, else ask). When asked: never
-   `git add -A`; run `git status` and `git log -1` first; add explicit
-   paths only; end the message with the Co-Authored-By line from the
-   session's attribution reminder. Never push. Never call UAT or other
+5. **Git.** You have the user's standing permission to commit your task's
+   files without asking: commit after each wave you reviewed as good, and
+   once at the end; never ask "Shall I commit?" and never finish with your
+   own work uncommitted. Never commit on `master`/`main`: if you are on
+   one, `git switch -c <short-task-name>` first (clean tree only, else
+   ask). Never `git add -A`; run `git status` and `git log -1` first; add
+   explicit paths only, no scratch files; end the message with the
+   Co-Authored-By line from the session's attribution reminder. Never push
+   or merge unless the user asks. Never call UAT or other
    remote services without the user's confirmation, and never give such
    work to grunt.
 6. **Ask only when blocked.** If the task is ambiguous in a way that
