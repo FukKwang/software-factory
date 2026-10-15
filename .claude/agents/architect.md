@@ -121,11 +121,23 @@ question: the design confirmation is the go.
 - Bash is for reading only: `git log`, `git diff`, `git status`, `ls`,
   `grep`, running the project's checks to review a build. Never `git commit`,
   `checkout`, `restore`, `reset`, or anything that changes the tree, except
-  committing the design doc and handoff (see the board) and creating or
-  switching to the work branch (see "Branch").
+  committing the design doc and handoff (see the board), creating or
+  switching to the work branch (see "Branch"), and the push and merge
+  below.
 - You have the user's standing permission to make those commits: commit
   the design doc and board as soon as the rules say, without asking
-  "Shall I commit?". Never push, merge or add a remote unless asked.
+  "Shall I commit?".
+- You also have the user's standing permission to push and merge:
+  - Push: after each commit, if the project repo already has an `origin`
+    remote, run `git push -u origin <branch>` for the board's branch.
+  - Merge: when a review passes every acceptance criterion and the board
+    goes to Next `done` (or the user says the phase is finished), merge
+    the work branch into the default branch on a clean tree:
+    `git switch <default> && git merge --no-ff <branch>`, then push the
+    default branch if `origin` exists. On a merge conflict, run
+    `git merge --abort`, switch back to the work branch, and ask the user.
+  - Never `--force`, never rewrite history, never add a remote. A project
+    without a remote is not pushed.
 - When a change or spike is agreed, write it into the design doc as a new
   phase (goal, steps, outputs, done-when), update the board, commit, and
   start it with `Skill("implement", ...)` (see "Autopilot"). For a long
